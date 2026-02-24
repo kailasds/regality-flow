@@ -1,10 +1,12 @@
+import { useState } from "react";
 import { FileText, Clock, CheckCircle2, Activity, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   PieChart, Pie, Cell, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Line, ComposedChart, Legend,
 } from "recharts";
-import { notifications, trendData, distributionData } from "@/data/mockData";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { notifications, trendData3m, trendData6m, trendData12m, distributionData } from "@/data/mockData";
 
 const kpis = [
   {
@@ -38,7 +40,14 @@ const kpis = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [trendRange, setTrendRange] = useState<string>("3m");
 
+  const trendDataMap: Record<string, typeof trendData3m> = {
+    "3m": trendData3m,
+    "6m": trendData6m,
+    "12m": trendData12m,
+  };
+  const activeTrendData = trendDataMap[trendRange];
   return (
     <div className="space-y-6">
       <div>
@@ -112,9 +121,21 @@ export default function Dashboard() {
 
         {/* Trend */}
         <div className="bg-card border border-border rounded-lg p-5 card-glow">
-          <h3 className="text-sm font-semibold text-foreground mb-4">3 Month Trend</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-foreground">Trend Overview</h3>
+            <Select value={trendRange} onValueChange={setTrendRange}>
+              <SelectTrigger className="w-[140px] h-8 text-xs bg-secondary border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border">
+                <SelectItem value="3m">Last 3 Months</SelectItem>
+                <SelectItem value="6m">Last 6 Months</SelectItem>
+                <SelectItem value="12m">Last 12 Months</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart data={trendData}>
+            <ComposedChart data={activeTrendData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="month" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={false} tickLine={false} />

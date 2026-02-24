@@ -116,11 +116,38 @@ export const timelineEvents = [
   { label: "Closed", date: "18 Feb", done: false },
 ];
 
-export const trendData = [
+export const trendData3m = [
   { month: "Jan", received: 94, closed: 70, closureRate: 74 },
   { month: "Feb", received: 110, closed: 83, closureRate: 75 },
   { month: "Mar", received: 128, closed: 76, closureRate: 59 },
 ];
+
+export const trendData6m = [
+  { month: "Oct", received: 78, closed: 62, closureRate: 79 },
+  { month: "Nov", received: 85, closed: 68, closureRate: 80 },
+  { month: "Dec", received: 92, closed: 74, closureRate: 80 },
+  { month: "Jan", received: 94, closed: 70, closureRate: 74 },
+  { month: "Feb", received: 110, closed: 83, closureRate: 75 },
+  { month: "Mar", received: 128, closed: 76, closureRate: 59 },
+];
+
+export const trendData12m = [
+  { month: "Apr", received: 65, closed: 52, closureRate: 80 },
+  { month: "May", received: 72, closed: 58, closureRate: 81 },
+  { month: "Jun", received: 68, closed: 55, closureRate: 81 },
+  { month: "Jul", received: 74, closed: 60, closureRate: 81 },
+  { month: "Aug", received: 80, closed: 65, closureRate: 81 },
+  { month: "Sep", received: 76, closed: 61, closureRate: 80 },
+  { month: "Oct", received: 78, closed: 62, closureRate: 79 },
+  { month: "Nov", received: 85, closed: 68, closureRate: 80 },
+  { month: "Dec", received: 92, closed: 74, closureRate: 80 },
+  { month: "Jan", received: 94, closed: 70, closureRate: 74 },
+  { month: "Feb", received: 110, closed: 83, closureRate: 75 },
+  { month: "Mar", received: 128, closed: 76, closureRate: 59 },
+];
+
+// Keep backward compat
+export const trendData = trendData3m;
 
 export const distributionData = [
   { name: "Processing", value: 18, color: "hsl(263, 70%, 58%)" },
