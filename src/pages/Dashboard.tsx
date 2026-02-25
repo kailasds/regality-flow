@@ -3,7 +3,7 @@ import { FileText, Clock, CheckCircle2, Activity, TrendingUp } from "lucide-reac
 import { useNavigate } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { notifications, distributionData, trendDistributionData } from "@/data/mockData";
+import { notifications, trendDistributionData } from "@/data/mockData";
 
 const kpis = [
   {
@@ -37,8 +37,11 @@ const kpis = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [distRange, setDistRange] = useState<string>("1m");
   const [trendRange, setTrendRange] = useState<string>("1m");
+  const activeDistData = trendDistributionData[distRange];
   const activeTrendDist = trendDistributionData[trendRange];
+
   return (
     <div className="space-y-6">
       <div>
@@ -82,24 +85,37 @@ export default function Dashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-2 gap-4">
-        {/* Donut */}
+        {/* Distribution Donut */}
         <div className="bg-card border border-border rounded-lg p-5 card-glow">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Current Month Distribution</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-foreground">Distribution Overview</h3>
+            <Select value={distRange} onValueChange={setDistRange}>
+              <SelectTrigger className="w-[140px] h-8 text-xs bg-secondary border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-card border-border">
+                <SelectItem value="1m">This Month</SelectItem>
+                <SelectItem value="2m">Last 2 Months</SelectItem>
+                <SelectItem value="3m">Last 3 Months</SelectItem>
+                <SelectItem value="6m">Last 6 Months</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex items-center gap-6">
             <ResponsiveContainer width={200} height={200}>
               <PieChart>
-                <Pie data={distributionData} cx="50%" cy="50%" innerRadius={55} outerRadius={80}
+                <Pie data={activeDistData.data} cx="50%" cy="50%" innerRadius={55} outerRadius={80}
                   dataKey="value" strokeWidth={0}>
-                  {distributionData.map((entry, i) => (
+                  {activeDistData.data.map((entry, i) => (
                     <Cell key={i} fill={entry.color} />
                   ))}
                 </Pie>
-                <text x="50%" y="46%" textAnchor="middle" className="fill-foreground text-lg font-bold">128</text>
+                <text x="50%" y="46%" textAnchor="middle" className="fill-foreground text-lg font-bold">{activeDistData.total}</text>
                 <text x="50%" y="58%" textAnchor="middle" className="fill-muted-foreground text-[10px]">Notifications</text>
               </PieChart>
             </ResponsiveContainer>
             <div className="space-y-3">
-              {distributionData.map((d) => (
+              {activeDistData.data.map((d) => (
                 <div key={d.name} className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ background: d.color }} />
                   <span className="text-xs text-muted-foreground">{d.name}</span>

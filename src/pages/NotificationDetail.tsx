@@ -1,13 +1,9 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { notifications } from "@/data/mockData";
 import StatusHistoryDrawer from "@/components/detail/StatusHistoryDrawer";
-import SummaryTab from "@/components/detail/SummaryTab";
-import MetadataTab from "@/components/detail/MetadataTab";
-import AnalysisTab from "@/components/detail/AnalysisTab";
-import ComparisonTab from "@/components/detail/ComparisonTab";
+import ProcessingStage from "@/components/detail/ProcessingStage";
 import ReviewStage from "@/components/detail/ReviewStage";
 import ActionStage from "@/components/detail/ActionStage";
 import ClosedStage from "@/components/detail/ClosedStage";
@@ -21,11 +17,27 @@ function getStageIndex(subStatus: string) {
   return 3;
 }
 
+// Demo notification for new uploads
+const demoNotification = {
+  id: "N-1056",
+  regulator: "RBI",
+  subject: "Revised Capital Adequacy Framework",
+  stage: "Pending" as const,
+  subStatus: "Processing" as const,
+  assignedTo: "AI Engine",
+  lastUpdated: "Just now",
+  department: "Compliance",
+};
+
 export default function NotificationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const notification = notifications.find((n) => n.id === id) || notifications[0];
-  const currentStage = getStageIndex(notification.subStatus);
+  const [searchParams] = useSearchParams();
+  const isNew = searchParams.get("new") === "true";
+
+  const notification = id === "N-1056" ? demoNotification :
+    notifications.find((n) => n.id === id) || notifications[0];
+  const currentStage = isNew ? 0 : getStageIndex(notification.subStatus);
 
   return (
     <div className="space-y-6">
@@ -68,22 +80,8 @@ export default function NotificationDetail() {
         </div>
       </div>
 
-      {/* Stage Content - Full Width */}
-      {currentStage === 0 && (
-        <Tabs defaultValue="summary">
-          <TabsList className="bg-secondary border border-border rounded-lg w-full justify-start px-1">
-            <TabsTrigger value="summary" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary">Summary</TabsTrigger>
-            <TabsTrigger value="metadata" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary">Metadata</TabsTrigger>
-            <TabsTrigger value="analysis" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary">Analysis</TabsTrigger>
-            <TabsTrigger value="comparison" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary">Comparison</TabsTrigger>
-          </TabsList>
-          <TabsContent value="summary" className="mt-6"><SummaryTab /></TabsContent>
-          <TabsContent value="metadata" className="mt-6"><MetadataTab /></TabsContent>
-          <TabsContent value="analysis" className="mt-6"><AnalysisTab /></TabsContent>
-          <TabsContent value="comparison" className="mt-6"><ComparisonTab /></TabsContent>
-        </Tabs>
-      )}
-
+      {/* Stage Content */}
+      {currentStage === 0 && <ProcessingStage isNew={isNew} />}
       {currentStage === 1 && <ReviewStage notification={notification} />}
       {currentStage === 2 && <ActionStage notification={notification} />}
       {currentStage === 3 && <ClosedStage />}
