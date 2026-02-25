@@ -1,12 +1,9 @@
 import { useState } from "react";
 import { FileText, Clock, CheckCircle2, Activity, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import {
-  PieChart, Pie, Cell, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Line, ComposedChart, Legend,
-} from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { notifications, trendData3m, trendData6m, trendData12m, distributionData } from "@/data/mockData";
+import { notifications, distributionData, trendDistributionData } from "@/data/mockData";
 
 const kpis = [
   {
@@ -40,14 +37,8 @@ const kpis = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [trendRange, setTrendRange] = useState<string>("3m");
-
-  const trendDataMap: Record<string, typeof trendData3m> = {
-    "3m": trendData3m,
-    "6m": trendData6m,
-    "12m": trendData12m,
-  };
-  const activeTrendData = trendDataMap[trendRange];
+  const [trendRange, setTrendRange] = useState<string>("1m");
+  const activeTrendDist = trendDistributionData[trendRange];
   return (
     <div className="space-y-6">
       <div>
@@ -119,40 +110,45 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Trend */}
+        {/* Trend Comparison */}
         <div className="bg-card border border-border rounded-lg p-5 card-glow">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground">Trend Overview</h3>
+            <h3 className="text-sm font-semibold text-foreground">Trend Comparison</h3>
             <Select value={trendRange} onValueChange={setTrendRange}>
               <SelectTrigger className="w-[140px] h-8 text-xs bg-secondary border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-card border-border">
+                <SelectItem value="1m">Last Month</SelectItem>
+                <SelectItem value="2m">Last 2 Months</SelectItem>
                 <SelectItem value="3m">Last 3 Months</SelectItem>
                 <SelectItem value="6m">Last 6 Months</SelectItem>
-                <SelectItem value="12m">Last 12 Months</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <ComposedChart data={activeTrendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="month" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                  color: "hsl(var(--foreground))",
-                }}
-              />
-              <Legend wrapperStyle={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }} />
-              <Bar dataKey="received" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={24} name="Received" />
-              <Bar dataKey="closed" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} barSize={24} name="Closed" />
-              <Line type="monotone" dataKey="closureRate" stroke="hsl(var(--warning))" strokeWidth={2} dot={false} name="Closure %" />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <div className="flex items-center gap-6">
+            <ResponsiveContainer width={200} height={200}>
+              <PieChart>
+                <Pie data={activeTrendDist.data} cx="50%" cy="50%" innerRadius={55} outerRadius={80}
+                  dataKey="value" strokeWidth={0}>
+                  {activeTrendDist.data.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} />
+                  ))}
+                </Pie>
+                <text x="50%" y="46%" textAnchor="middle" className="fill-foreground text-lg font-bold">{activeTrendDist.total}</text>
+                <text x="50%" y="58%" textAnchor="middle" className="fill-muted-foreground text-[10px]">Notifications</text>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="space-y-3">
+              {activeTrendDist.data.map((d) => (
+                <div key={d.name} className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: d.color }} />
+                  <span className="text-xs text-muted-foreground">{d.name}</span>
+                  <span className="text-xs font-semibold text-foreground ml-auto">{d.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 

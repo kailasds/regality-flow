@@ -155,3 +155,42 @@ export const distributionData = [
   { name: "For Action", value: 8, color: "hsl(38, 92%, 50%)" },
   { name: "Closed", value: 76, color: "hsl(142, 71%, 45%)" },
 ];
+
+export const trendDistributionData: Record<string, { data: typeof distributionData; total: number }> = {
+  "1m": {
+    total: 128,
+    data: [
+      { name: "Processing", value: 18, color: "hsl(263, 70%, 58%)" },
+      { name: "Under Review", value: 11, color: "hsl(280, 80%, 65%)" },
+      { name: "For Action", value: 8, color: "hsl(38, 92%, 50%)" },
+      { name: "Closed", value: 76, color: "hsl(142, 71%, 45%)" },
+    ],
+  },
+  "2m": {
+    total: 238,
+    data: [
+      { name: "Processing", value: 32, color: "hsl(263, 70%, 58%)" },
+      { name: "Under Review", value: 24, color: "hsl(280, 80%, 65%)" },
+      { name: "For Action", value: 15, color: "hsl(38, 92%, 50%)" },
+      { name: "Closed", value: 159, color: "hsl(142, 71%, 45%)" },
+    ],
+  },
+  "3m": {
+    total: 332,
+    data: [
+      { name: "Processing", value: 48, color: "hsl(263, 70%, 58%)" },
+      { name: "Under Review", value: 36, color: "hsl(280, 80%, 65%)" },
+      { name: "For Action", value: 22, color: "hsl(38, 92%, 50%)" },
+      { name: "Closed", value: 229, color: "hsl(142, 71%, 45%)" },
+    ],
+  },
+  "6m": {
+    total: 587,
+    data: [
+      { name: "Processing", value: 74, color: "hsl(263, 70%, 58%)" },
+      { name: "Under Review", value: 58, color: "hsl(280, 80%, 65%)" },
+      { name: "For Action", value: 41, color: "hsl(38, 92%, 50%)" },
+      { name: "Closed", value: 397, color: "hsl(142, 71%, 45%)" },
+    ],
+  },
+};

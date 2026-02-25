@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, Eye } from "lucide-react";
+import { Search, Filter, Eye, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ export default function Notifications() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [deptFilter, setDeptFilter] = useState("all");
+  const [timeRange, setTimeRange] = useState("all");
 
   const filtered = notifications.filter((n) => {
     const matchSearch = n.subject.toLowerCase().includes(search.toLowerCase()) ||
@@ -62,6 +63,20 @@ export default function Notifications() {
             <SelectItem value="Legal">Legal</SelectItem>
             <SelectItem value="Finance">Finance</SelectItem>
             <SelectItem value="Digital Banking">Digital Banking</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={timeRange} onValueChange={setTimeRange}>
+          <SelectTrigger className="w-48 bg-card border-border h-9">
+            <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+            <SelectValue placeholder="Time Range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="week">Last 7 Days</SelectItem>
+            <SelectItem value="month">Last Month</SelectItem>
+            <SelectItem value="3m">Last 3 Months</SelectItem>
+            <SelectItem value="6m">Last 6 Months</SelectItem>
           </SelectContent>
         </Select>
       </div>
