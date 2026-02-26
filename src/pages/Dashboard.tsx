@@ -101,7 +101,7 @@ export default function Dashboard() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center justify-center gap-6">
             <ResponsiveContainer width={200} height={200}>
               <PieChart>
                 <Pie data={activeDistData.data} cx="50%" cy="50%" innerRadius={55} outerRadius={80}
@@ -142,7 +142,7 @@ export default function Dashboard() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center justify-center gap-6">
             <ResponsiveContainer width={200} height={200}>
               <PieChart>
                 <Pie data={activeTrendDist.data} cx="50%" cy="50%" innerRadius={55} outerRadius={80}
