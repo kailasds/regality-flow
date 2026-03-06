@@ -1,12 +1,12 @@
-import { LayoutDashboard, Bell, BarChart3, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Clock, CheckCircle2, Archive } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 
 const navItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Notifications", url: "/notifications", icon: Bell },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Pending Notifications", url: "/pending", icon: Clock },
+  { title: "Processed Notifications", url: "/processed", icon: CheckCircle2 },
+  { title: "Closed Notifications", url: "/closed", icon: Archive },
 ];
 
 export function AppSidebar() {
@@ -23,7 +23,7 @@ export function AppSidebar() {
 
       <nav className="flex-1 px-3 space-y-1">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.url || 
+          const isActive = location.pathname === item.url ||
             (item.url !== "/" && location.pathname.startsWith(item.url));
           return (
             <NavLink
@@ -43,13 +43,6 @@ export function AppSidebar() {
           );
         })}
       </nav>
-
-      <div className="p-3 border-t border-border">
-        <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all w-full">
-          <LogOut className="h-4 w-4" />
-          <span>Logout</span>
-        </button>
-      </div>
     </aside>
   );
 }
