@@ -7,6 +7,7 @@ export interface Notification {
   assignedTo: string;
   lastUpdated: string;
   department?: string;
+  month?: string;
   metadata?: MetadataFields;
 }
 
@@ -29,6 +30,7 @@ export const notifications: Notification[] = [
     assignedTo: "AI Engine",
     lastUpdated: "2 hrs ago",
     department: "Compliance",
+    month: "March",
     metadata: {
       documentType: "Regulatory Circular",
       effectiveDate: "12 Feb 2026",
@@ -53,6 +55,7 @@ export const notifications: Notification[] = [
     assignedTo: "John Mathew",
     lastUpdated: "5 hrs ago",
     department: "Risk",
+    month: "March",
   },
   {
     id: "N-1022",
@@ -63,6 +66,7 @@ export const notifications: Notification[] = [
     assignedTo: "Mortgage Dept",
     lastUpdated: "1 day ago",
     department: "Mortgage",
+    month: "March",
   },
   {
     id: "N-1021",
@@ -73,6 +77,7 @@ export const notifications: Notification[] = [
     assignedTo: "—",
     lastUpdated: "2 days ago",
     department: "Compliance",
+    month: "February",
   },
   {
     id: "N-1020",
@@ -83,6 +88,7 @@ export const notifications: Notification[] = [
     assignedTo: "—",
     lastUpdated: "3 days ago",
     department: "Legal",
+    month: "February",
   },
   {
     id: "N-1019",
@@ -93,6 +99,7 @@ export const notifications: Notification[] = [
     assignedTo: "Priya Sharma",
     lastUpdated: "6 hrs ago",
     department: "Finance",
+    month: "February",
   },
   {
     id: "N-1018",
@@ -103,6 +110,7 @@ export const notifications: Notification[] = [
     assignedTo: "—",
     lastUpdated: "5 days ago",
     department: "Digital Banking",
+    month: "January",
   },
 ];
 
@@ -146,7 +154,6 @@ export const trendData12m = [
   { month: "Mar", received: 128, closed: 76, closureRate: 59 },
 ];
 
-// Keep backward compat
 export const trendData = trendData3m;
 
 export const distributionData = [
