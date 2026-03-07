@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import { AppLayout } from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
@@ -33,7 +34,7 @@ const AppRoutes = () => (
   <Routes>
     <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
     <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-    <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+    <Route element={<ProtectedRoute><NotificationProvider><AppLayout /></NotificationProvider></ProtectedRoute>}>
       <Route path="/" element={<Dashboard />} />
       <Route path="/pending" element={<PendingNotifications />} />
       <Route path="/processed" element={<ProcessedNotifications />} />

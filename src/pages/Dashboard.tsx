@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { FileText, Clock, CheckCircle2, Activity, Plus, Upload } from "lucide-react";
+import { FileText, Clock, CheckCircle2, Plus, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { notifications } from "@/data/mockData";
+import { useNotifications } from "@/contexts/NotificationContext";
 
 const months = [
   "January", "February", "March", "April", "May", "June",
@@ -30,6 +30,7 @@ const currentMonth = "March";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { notifications, addNotification } = useNotifications();
   const [prevMonth, setPrevMonth] = useState("February");
   const [tableFilter, setTableFilter] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -38,11 +39,17 @@ export default function Dashboard() {
   const prevData = monthData[prevMonth];
 
   const filteredNotifications = tableFilter
-    ? notifications.filter((n) => n.month === tableFilter)
+    ? notifications.filter((n) => n.month?.startsWith(tableFilter))
     : notifications.slice(0, 5);
 
   const handleNewNotification = () => {
     setModalOpen(false);
+    addNotification({
+      subject: "Revised Capital Adequacy Framework",
+      regulator: "RBI",
+      department: "Compliance",
+      attachment: "Capital_Framework.pdf",
+    });
     navigate("/pending");
   };
 
@@ -56,8 +63,7 @@ export default function Dashboard() {
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2 rounded-[10px]">
-              <Plus className="h-4 w-4" />
-              New Notification
+              <Plus className="h-4 w-4" /> New Notification
             </Button>
           </DialogTrigger>
           <DialogContent className="bg-card border-border">
@@ -84,23 +90,16 @@ export default function Dashboard() {
         <div className="bg-card border border-border rounded-lg p-5 card-glow">
           <h3 className="text-sm font-semibold text-foreground mb-4">{currentMonth} Report</h3>
           <div className="space-y-4">
-            <div
-              className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 cursor-pointer hover:bg-secondary transition-colors"
-              onClick={() => setTableFilter(tableFilter === currentMonth ? null : currentMonth)}
-            >
+            <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 cursor-pointer hover:bg-secondary transition-colors" onClick={() => setTableFilter(tableFilter === currentMonth ? null : currentMonth)}>
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg gradient-purple-subtle flex items-center justify-center">
-                  <FileText className="h-4 w-4 text-primary" />
-                </div>
+                <div className="h-9 w-9 rounded-lg gradient-purple-subtle flex items-center justify-center"><FileText className="h-4 w-4 text-primary" /></div>
                 <span className="text-sm text-muted-foreground">Total Notifications</span>
               </div>
               <span className="text-2xl font-bold text-foreground">{currentData.total}</span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-success/15 flex items-center justify-center">
-                  <CheckCircle2 className="h-4 w-4 text-success" />
-                </div>
+                <div className="h-9 w-9 rounded-lg bg-success/15 flex items-center justify-center"><CheckCircle2 className="h-4 w-4 text-success" /></div>
                 <span className="text-sm text-muted-foreground">Closed</span>
               </div>
               <span className="text-2xl font-bold text-foreground">{currentData.closed}</span>
@@ -108,26 +107,15 @@ export default function Dashboard() {
             <div className="p-3 rounded-lg bg-secondary/50">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-primary/15 flex items-center justify-center">
-                    <Clock className="h-4 w-4 text-primary" />
-                  </div>
+                  <div className="h-9 w-9 rounded-lg bg-primary/15 flex items-center justify-center"><Clock className="h-4 w-4 text-primary" /></div>
                   <span className="text-sm text-muted-foreground">Processing</span>
                 </div>
                 <span className="text-2xl font-bold text-foreground">{currentData.processing}</span>
               </div>
               <div className="ml-12 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Processed</span>
-                  <span className="text-sm font-semibold text-foreground">{currentData.processed}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Review</span>
-                  <span className="text-sm font-semibold text-foreground">{currentData.review}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Action</span>
-                  <span className="text-sm font-semibold text-foreground">{currentData.action}</span>
-                </div>
+                <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Processed</span><span className="text-sm font-semibold text-foreground">{currentData.processed}</span></div>
+                <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Review</span><span className="text-sm font-semibold text-foreground">{currentData.review}</span></div>
+                <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Action</span><span className="text-sm font-semibold text-foreground">{currentData.action}</span></div>
               </div>
             </div>
           </div>
@@ -138,34 +126,23 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-foreground">Previous Month</h3>
             <Select value={prevMonth} onValueChange={setPrevMonth}>
-              <SelectTrigger className="w-[140px] h-8 text-xs bg-secondary border-border">
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger className="w-[140px] h-8 text-xs bg-secondary border-border"><SelectValue /></SelectTrigger>
               <SelectContent className="bg-card border-border">
-                {months.filter((m) => m !== currentMonth).map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
-                ))}
+                {months.filter((m) => m !== currentMonth).map((m) => (<SelectItem key={m} value={m}>{m}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-4">
-            <div
-              className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 cursor-pointer hover:bg-secondary transition-colors"
-              onClick={() => setTableFilter(tableFilter === prevMonth ? null : prevMonth)}
-            >
+            <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 cursor-pointer hover:bg-secondary transition-colors" onClick={() => setTableFilter(tableFilter === prevMonth ? null : prevMonth)}>
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg gradient-purple-subtle flex items-center justify-center">
-                  <FileText className="h-4 w-4 text-primary" />
-                </div>
+                <div className="h-9 w-9 rounded-lg gradient-purple-subtle flex items-center justify-center"><FileText className="h-4 w-4 text-primary" /></div>
                 <span className="text-sm text-muted-foreground">Total Notifications</span>
               </div>
               <span className="text-2xl font-bold text-foreground">{prevData.total}</span>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-success/15 flex items-center justify-center">
-                  <CheckCircle2 className="h-4 w-4 text-success" />
-                </div>
+                <div className="h-9 w-9 rounded-lg bg-success/15 flex items-center justify-center"><CheckCircle2 className="h-4 w-4 text-success" /></div>
                 <span className="text-sm text-muted-foreground">Closed</span>
               </div>
               <span className="text-2xl font-bold text-foreground">{prevData.closed}</span>
@@ -173,26 +150,15 @@ export default function Dashboard() {
             <div className="p-3 rounded-lg bg-secondary/50">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-lg bg-primary/15 flex items-center justify-center">
-                    <Clock className="h-4 w-4 text-primary" />
-                  </div>
+                  <div className="h-9 w-9 rounded-lg bg-primary/15 flex items-center justify-center"><Clock className="h-4 w-4 text-primary" /></div>
                   <span className="text-sm text-muted-foreground">Processing</span>
                 </div>
                 <span className="text-2xl font-bold text-foreground">{prevData.processing}</span>
               </div>
               <div className="ml-12 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Processed</span>
-                  <span className="text-sm font-semibold text-foreground">{prevData.processed}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Review</span>
-                  <span className="text-sm font-semibold text-foreground">{prevData.review}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Action</span>
-                  <span className="text-sm font-semibold text-foreground">{prevData.action}</span>
-                </div>
+                <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Processed</span><span className="text-sm font-semibold text-foreground">{prevData.processed}</span></div>
+                <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Review</span><span className="text-sm font-semibold text-foreground">{prevData.review}</span></div>
+                <div className="flex items-center justify-between"><span className="text-xs text-muted-foreground">Action</span><span className="text-sm font-semibold text-foreground">{prevData.action}</span></div>
               </div>
             </div>
           </div>
@@ -206,9 +172,7 @@ export default function Dashboard() {
             {tableFilter ? `${tableFilter} Notifications` : "Recent Notifications"}
           </h3>
           {tableFilter && (
-            <button onClick={() => setTableFilter(null)} className="text-xs text-primary hover:underline">
-              Clear filter
-            </button>
+            <button onClick={() => setTableFilter(null)} className="text-xs text-primary hover:underline">Clear filter</button>
           )}
         </div>
         <table className="w-full">
@@ -221,24 +185,11 @@ export default function Dashboard() {
           </thead>
           <tbody>
             {filteredNotifications.map((n) => (
-              <tr
-                key={n.id}
-                className="border-b border-border last:border-0 hover:bg-secondary/50 cursor-pointer transition-colors"
-                onClick={() => navigate(`/notifications/${n.id}`)}
-              >
+              <tr key={n.id} className="border-b border-border last:border-0 hover:bg-secondary/50 cursor-pointer transition-colors" onClick={() => navigate(`/notifications/${n.id}`)}>
                 <td className="px-5 py-3.5 text-sm font-mono text-primary">{n.id}</td>
                 <td className="px-5 py-3.5 text-sm text-foreground">{n.subject}</td>
                 <td className="px-5 py-3.5">
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
-                      n.stage === "Closed" ? "bg-success/15 text-success" : "bg-primary/15 text-primary"
-                    }`}>
-                      {n.stage}
-                    </span>
-                    {n.subStatus !== n.stage && (
-                      <span className="text-xs text-muted-foreground">{n.subStatus}</span>
-                    )}
-                  </div>
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${n.subStatus === "Closed" ? "bg-success/15 text-success" : "bg-primary/15 text-primary"}`}>{n.subStatus}</span>
                 </td>
                 <td className="px-5 py-3.5 text-sm text-muted-foreground">{n.assignedTo}</td>
                 <td className="px-5 py-3.5 text-sm text-muted-foreground">{n.lastUpdated}</td>
