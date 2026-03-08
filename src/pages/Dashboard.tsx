@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { FileText, Clock, CheckCircle2, Plus, Upload, TrendingUp, TrendingDown, ArrowRight, ChevronRight } from "lucide-react";
+import { FileText, Clock, CheckCircle2, Plus, Upload, TrendingUp, TrendingDown, ChevronDown, ArrowRight, Search, Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useNotifications } from "@/contexts/NotificationContext";
 
@@ -28,41 +29,12 @@ const monthData: Record<string, { total: number; closed: number; processing: num
 
 const currentMonth = "March";
 
-function MetricRow({ icon, iconBg, label, value, onClick, active }: {
-  icon: React.ReactNode;
-  iconBg: string;
-  label: string;
-  value: number;
-  onClick?: () => void;
-  active?: boolean;
-}) {
+function BreakdownChip({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div
-      className={`flex items-center justify-between p-3.5 rounded-xl transition-all duration-200 ${
-        onClick ? "cursor-pointer" : ""
-      } ${active ? "bg-primary/10 border border-primary/30 shadow-[0_0_15px_hsl(var(--primary)/0.1)]" : "bg-secondary/40 hover:bg-secondary/70 border border-transparent"}`}
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-3">
-        <div className={`h-10 w-10 rounded-xl ${iconBg} flex items-center justify-center`}>{icon}</div>
-        <span className="text-sm text-muted-foreground font-medium">{label}</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="text-2xl font-bold text-foreground tabular-nums">{value}</span>
-        {onClick && <ChevronRight className={`h-4 w-4 transition-transform ${active ? "text-primary rotate-90" : "text-muted-foreground"}`} />}
-      </div>
-    </div>
-  );
-}
-
-function SubMetric({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div className="flex items-center justify-between py-1.5">
-      <div className="flex items-center gap-2">
-        <div className={`h-1.5 w-1.5 rounded-full ${color}`} />
-        <span className="text-xs text-muted-foreground">{label}</span>
-      </div>
-      <span className="text-sm font-semibold text-foreground tabular-nums">{value}</span>
+    <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-secondary/60 border border-border/50">
+      <div className={`h-2 w-2 rounded-full ${color}`} />
+      <span className="text-xs text-muted-foreground font-medium">{label}</span>
+      <span className="text-sm font-bold text-foreground tabular-nums ml-auto">{value}</span>
     </div>
   );
 }
@@ -73,12 +45,15 @@ export default function Dashboard() {
   const [prevMonth, setPrevMonth] = useState("February");
   const [tableFilter, setTableFilter] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [tableSearch, setTableSearch] = useState("");
 
   const currentData = monthData[currentMonth];
   const prevData = monthData[prevMonth];
 
   const filteredNotifications = tableFilter
-    ? notifications.filter((n) => n.month?.startsWith(tableFilter))
+    ? notifications
+        .filter((n) => n.month?.startsWith(tableFilter))
+        .filter((n) => tableSearch === "" || n.subject.toLowerCase().includes(tableSearch.toLowerCase()) || n.id.toLowerCase().includes(tableSearch.toLowerCase()))
     : [];
 
   const closureRate = (data: typeof currentData) => Math.round((data.closed / data.total) * 100);
@@ -94,8 +69,139 @@ export default function Dashboard() {
     navigate("/pending");
   };
 
+  const toggleFilter = (month: string) => {
+    setTableFilter((prev) => (prev === month ? null : month));
+    setTableSearch("");
+  };
+
+  const renderCard = (
+    title: string,
+    subtitle: string,
+    data: typeof currentData,
+    month: string,
+    isCurrentMonth: boolean
+  ) => {
+    const isActive = tableFilter === month;
+    const rate = closureRate(data);
+
+    return (
+      <div className={`relative bg-card border rounded-2xl overflow-hidden transition-all duration-300 glass-card ${
+        isActive
+          ? "border-primary/50 shadow-[0_0_30px_-5px_hsl(var(--primary)/0.2)]"
+          : "border-border hover:border-border/80 hover:shadow-[0_8px_30px_-10px_hsl(0_0%_0%/0.3)]"
+      }`}>
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent pointer-events-none" />
+
+        {/* Header */}
+        <div className="relative px-6 pt-5 pb-4 border-b border-border/50 flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-foreground">{title}</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {!isCurrentMonth && (
+              <Select value={prevMonth} onValueChange={(v) => { setPrevMonth(v); if (tableFilter && tableFilter !== currentMonth) setTableFilter(null); }}>
+                <SelectTrigger className="w-[130px] h-8 text-xs bg-secondary/80 border-border/50 rounded-lg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {months.filter((m) => m !== currentMonth).map((m) => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+              rate >= 60 ? "bg-success/15 text-success" : "bg-warning/15 text-warning"
+            }`}>
+              {rate >= 60 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+              {rate}% closed
+            </div>
+          </div>
+        </div>
+
+        {/* KPI Section */}
+        <div className="relative px-6 pt-6 pb-4">
+          <button
+            onClick={() => toggleFilter(month)}
+            className={`w-full text-left group rounded-xl p-5 transition-all duration-200 border ${
+              isActive
+                ? "bg-primary/10 border-primary/30 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)]"
+                : "bg-secondary/40 border-transparent hover:bg-secondary/70 hover:border-border/50"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-5xl font-bold text-foreground tabular-nums tracking-tight">{data.total}</p>
+                <p className="text-sm text-muted-foreground mt-1.5 font-medium">Total Notifications</p>
+              </div>
+              <div className={`flex items-center gap-1.5 transition-all duration-200 ${
+                isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+              }`}>
+                <span className="text-xs font-medium">{isActive ? "Showing list" : "View list"}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${isActive ? "rotate-180" : ""}`} />
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* Status Summary */}
+        <div className="relative px-6 pb-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-success/[0.08] border border-success/15">
+              <div className="h-10 w-10 rounded-xl bg-success/15 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground tabular-nums">{data.closed}</p>
+                <p className="text-xs text-muted-foreground font-medium">Closed</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/[0.08] border border-primary/15">
+              <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                <Clock className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground tabular-nums">{data.processing}</p>
+                <p className="text-xs text-muted-foreground font-medium">Processing</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Processing Breakdown */}
+        <div className="relative px-6 pb-5">
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-2.5">Processing Breakdown</p>
+          <div className="grid grid-cols-3 gap-2">
+            <BreakdownChip label="Processed" value={data.processed} color="bg-primary" />
+            <BreakdownChip label="Review" value={data.review} color="bg-accent" />
+            <BreakdownChip label="Action" value={data.action} color="bg-warning" />
+          </div>
+        </div>
+
+        {/* Comparison footer for previous month */}
+        {!isCurrentMonth && (
+          <div className="relative px-6 pb-5">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 w-fit">
+              {prevData.total > currentData.total ? (
+                <TrendingUp className="h-3.5 w-3.5 text-success" />
+              ) : (
+                <TrendingDown className="h-3.5 w-3.5 text-warning" />
+              )}
+              <span className="text-xs font-medium text-muted-foreground">
+                {Math.abs(currentData.total - prevData.total)} {prevData.total > currentData.total ? "more" : "fewer"} than {currentMonth}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-foreground">Dashboard</h2>
@@ -127,153 +233,71 @@ export default function Dashboard() {
 
       {/* Monthly Report Panels */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Current Month */}
-        <div className="bg-card border border-border rounded-2xl overflow-hidden card-glow">
-          <div className="px-6 pt-5 pb-4 border-b border-border/50 flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-semibold text-foreground">{currentMonth} Report</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Current month overview</p>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 border border-success/20">
-              <TrendingUp className="h-3.5 w-3.5 text-success" />
-              <span className="text-xs font-medium text-success">{closureRate(currentData)}% closed</span>
-            </div>
-          </div>
-          <div className="p-5 space-y-3">
-            <MetricRow
-              icon={<FileText className="h-4.5 w-4.5 text-primary" />}
-              iconBg="bg-primary/15"
-              label="Total Notifications"
-              value={currentData.total}
-              onClick={() => setTableFilter(tableFilter === currentMonth ? null : currentMonth)}
-              active={tableFilter === currentMonth}
-            />
-            <MetricRow
-              icon={<CheckCircle2 className="h-4.5 w-4.5 text-success" />}
-              iconBg="bg-success/15"
-              label="Closed"
-              value={currentData.closed}
-            />
-            <div className="rounded-xl bg-secondary/40 border border-transparent p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center">
-                    <Clock className="h-4.5 w-4.5 text-primary" />
-                  </div>
-                  <span className="text-sm text-muted-foreground font-medium">Processing</span>
-                </div>
-                <span className="text-2xl font-bold text-foreground tabular-nums">{currentData.processing}</span>
-              </div>
-              <div className="ml-[52px] space-y-1 border-l-2 border-border/50 pl-4">
-                <SubMetric label="Processed" value={currentData.processed} color="bg-primary" />
-                <SubMetric label="Review" value={currentData.review} color="bg-accent" />
-                <SubMetric label="Action" value={currentData.action} color="bg-warning" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Previous Month */}
-        <div className="bg-card border border-border rounded-2xl overflow-hidden card-glow">
-          <div className="px-6 pt-5 pb-4 border-b border-border/50 flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-semibold text-foreground">Previous Month</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Historical comparison</p>
-            </div>
-            <Select value={prevMonth} onValueChange={(v) => { setPrevMonth(v); if (tableFilter && tableFilter !== currentMonth) setTableFilter(null); }}>
-              <SelectTrigger className="w-[140px] h-8 text-xs bg-secondary/80 border-border/50 rounded-lg">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-card border-border">
-                {months.filter((m) => m !== currentMonth).map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="p-5 space-y-3">
-            <MetricRow
-              icon={<FileText className="h-4.5 w-4.5 text-primary" />}
-              iconBg="bg-primary/15"
-              label="Total Notifications"
-              value={prevData.total}
-              onClick={() => setTableFilter(tableFilter === prevMonth ? null : prevMonth)}
-              active={tableFilter === prevMonth}
-            />
-            <MetricRow
-              icon={<CheckCircle2 className="h-4.5 w-4.5 text-success" />}
-              iconBg="bg-success/15"
-              label="Closed"
-              value={prevData.closed}
-            />
-            <div className="rounded-xl bg-secondary/40 border border-transparent p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center">
-                    <Clock className="h-4.5 w-4.5 text-primary" />
-                  </div>
-                  <span className="text-sm text-muted-foreground font-medium">Processing</span>
-                </div>
-                <span className="text-2xl font-bold text-foreground tabular-nums">{prevData.processing}</span>
-              </div>
-              <div className="ml-[52px] space-y-1 border-l-2 border-border/50 pl-4">
-                <SubMetric label="Processed" value={prevData.processed} color="bg-primary" />
-                <SubMetric label="Review" value={prevData.review} color="bg-accent" />
-                <SubMetric label="Action" value={prevData.action} color="bg-warning" />
-              </div>
-            </div>
-          </div>
-          <div className="px-6 pb-4">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 w-fit">
-              {prevData.total > currentData.total ? (
-                <TrendingUp className="h-3.5 w-3.5 text-success" />
-              ) : (
-                <TrendingDown className="h-3.5 w-3.5 text-warning" />
-              )}
-              <span className="text-xs font-medium text-muted-foreground">
-                {Math.abs(currentData.total - prevData.total)} {prevData.total > currentData.total ? "more" : "fewer"} than {currentMonth}
-              </span>
-            </div>
-          </div>
-        </div>
+        {renderCard("March Report", "Current month overview", currentData, currentMonth, true)}
+        {renderCard("Previous Month", "Historical comparison", prevData, prevMonth, false)}
       </div>
 
-      {/* Notifications Table - only shown when a card is clicked */}
-      {tableFilter && (
-        <div className="bg-card border border-border rounded-2xl card-glow animate-in fade-in-0 slide-in-from-top-2 duration-300">
-          <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-foreground">
-              {tableFilter} Notifications
-            </h3>
-            <button onClick={() => setTableFilter(null)} className="text-xs text-primary hover:underline">Clear filter</button>
+      {/* Notification Table */}
+      <div className={`overflow-hidden transition-all duration-300 ease-out ${
+        tableFilter ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+      }`}>
+        {tableFilter && (
+          <div className="bg-card border border-border rounded-2xl">
+            <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between gap-4">
+              <h3 className="text-sm font-semibold text-foreground whitespace-nowrap">
+                {tableFilter} Notifications
+              </h3>
+              <div className="flex items-center gap-3 flex-1 justify-end">
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by ID or subject..."
+                    value={tableSearch}
+                    onChange={(e) => setTableSearch(e.target.value)}
+                    className="pl-9 h-8 text-xs bg-secondary border-border/50"
+                  />
+                </div>
+                <button onClick={() => setTableFilter(null)} className="text-xs text-primary hover:underline whitespace-nowrap">
+                  Clear filter
+                </button>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border/50">
+                    {["ID", "Type", "Subject", "Status", "Department", "Date", "Analyst"].map((h) => (
+                      <th key={h} className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredNotifications.map((n) => (
+                    <tr key={n.id} className="border-b border-border/30 last:border-0 hover:bg-secondary/50 cursor-pointer transition-colors" onClick={() => navigate(`/notifications/${n.id}`)}>
+                      <td className="px-6 py-3.5 text-sm font-mono text-primary">{n.id}</td>
+                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.regulator}</td>
+                      <td className="px-6 py-3.5 text-sm text-foreground">{n.subject}</td>
+                      <td className="px-6 py-3.5">
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          n.subStatus === "Closed" ? "bg-success/15 text-success"
+                          : n.subStatus === "For Action" ? "bg-warning/15 text-warning"
+                          : "bg-primary/15 text-primary"
+                        }`}>{n.subStatus}</span>
+                      </td>
+                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.department}</td>
+                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.dateReceived}</td>
+                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.assignedTo}</td>
+                    </tr>
+                  ))}
+                  {filteredNotifications.length === 0 && (
+                    <tr><td colSpan={7} className="px-6 py-10 text-center text-muted-foreground text-sm">No notifications found for {tableFilter}</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border/50">
-                {["ID", "Subject", "Status", "Assigned", "Last Updated"].map((h) => (
-                  <th key={h} className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredNotifications.map((n) => (
-                <tr key={n.id} className="border-b border-border/30 last:border-0 hover:bg-secondary/50 cursor-pointer transition-colors" onClick={() => navigate(`/notifications/${n.id}`)}>
-                  <td className="px-6 py-3.5 text-sm font-mono text-primary">{n.id}</td>
-                  <td className="px-6 py-3.5 text-sm text-foreground">{n.subject}</td>
-                  <td className="px-6 py-3.5">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${n.subStatus === "Closed" ? "bg-success/15 text-success" : "bg-primary/15 text-primary"}`}>{n.subStatus}</span>
-                  </td>
-                  <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.assignedTo}</td>
-                  <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.lastUpdated}</td>
-                </tr>
-              ))}
-              {filteredNotifications.length === 0 && (
-                <tr><td colSpan={5} className="px-6 py-10 text-center text-muted-foreground text-sm">No notifications found for {tableFilter}</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

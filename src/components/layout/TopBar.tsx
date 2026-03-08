@@ -1,16 +1,19 @@
-import { Search, User, Settings, LogOut } from "lucide-react";
+import { Search, User, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 export function TopBar() {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -39,7 +42,12 @@ export function TopBar() {
               <User className="h-4 w-4 text-primary-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-card border-border w-44">
+          <DropdownMenuContent align="end" className="bg-popover border-border w-44">
+            <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
+              {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
               <Settings className="h-4 w-4 mr-2" />
               Settings
