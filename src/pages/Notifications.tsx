@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Filter, Eye, Calendar, FileText, Clock, CheckCircle2, Activity, TrendingUp, Plus, Upload, X } from "lucide-react";
+import { Search, Filter, Eye, Calendar, FileText, Clock, CheckCircle2, Activity, TrendingUp, Plus, Upload, X, Brain } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ export default function Notifications() {
   const [timeRange, setTimeRange] = useState("all");
   const [showNewModal, setShowNewModal] = useState(false);
   const [newForm, setNewForm] = useState({ regulator: "", department: "", versionType: "" });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const filtered = notifications.filter((n) => {
     const matchSearch = n.subject.toLowerCase().includes(search.toLowerCase()) ||
@@ -36,8 +37,12 @@ export default function Notifications() {
   });
 
   const handleStartProcessing = () => {
-    setShowNewModal(false);
-    navigate("/notifications/N-1056?new=true");
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setShowNewModal(false);
+      navigate("/notifications/N-1056?new=true");
+    }, 3000);
   };
 
   return (
@@ -231,9 +236,27 @@ export default function Notifications() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleStartProcessing} className="w-full gradient-purple border-0 text-primary-foreground glow-purple-sm mt-2">
-              Start AI Processing
-            </Button>
+            {isProcessing ? (
+              <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                <div className="relative">
+                  <div className="h-16 w-16 rounded-full border-4 border-muted animate-spin border-t-primary" />
+                  <Brain className="h-6 w-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                </div>
+                <div className="text-center space-y-1">
+                  <p className="text-sm font-semibold text-foreground animate-pulse">AI Processing in progress…</p>
+                  <p className="text-xs text-muted-foreground">Extracting metadata, analyzing obligations & generating summary</p>
+                </div>
+                <div className="w-full max-w-xs">
+                  <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+                    <div className="h-full rounded-full bg-primary animate-[processing_3s_ease-in-out_forwards]" />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Button onClick={handleStartProcessing} className="w-full gradient-purple border-0 text-primary-foreground glow-purple-sm mt-2">
+                Start AI Processing
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>

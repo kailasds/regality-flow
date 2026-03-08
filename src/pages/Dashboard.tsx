@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Clock, CheckCircle2, Plus, Upload, TrendingUp, TrendingDown, ChevronDown, ArrowRight, Search, Filter } from "lucide-react";
+import { FileText, Clock, CheckCircle2, Plus, Upload, TrendingUp, TrendingDown, ChevronDown, ArrowRight, Search, Filter, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,7 @@ export default function Dashboard() {
   const [tableFilter, setTableFilter] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [tableSearch, setTableSearch] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const currentData = monthData[currentMonth];
   const prevData = monthData[prevMonth];
@@ -59,14 +60,18 @@ export default function Dashboard() {
   const closureRate = (data: typeof currentData) => Math.round((data.closed / data.total) * 100);
 
   const handleNewNotification = () => {
-    setModalOpen(false);
-    addNotification({
-      subject: "Revised Capital Adequacy Framework",
-      regulator: "RBI",
-      department: "Compliance",
-      attachment: "Capital_Framework.pdf",
-    });
-    navigate("/pending");
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setModalOpen(false);
+      addNotification({
+        subject: "Revised Capital Adequacy Framework",
+        regulator: "RBI",
+        department: "Compliance",
+        attachment: "Capital_Framework.pdf",
+      });
+      navigate("/pending");
+    }, 3000);
   };
 
   const toggleFilter = (month: string) => {
@@ -218,14 +223,34 @@ export default function Dashboard() {
               <DialogTitle>Upload New Regulatory Notification</DialogTitle>
             </DialogHeader>
             <div className="mt-4 space-y-4">
-              <div className="border-2 border-dashed border-border rounded-xl p-10 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm text-foreground font-medium">Drag & drop your file here</p>
-                <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
-              </div>
-              <Button onClick={handleNewNotification} className="w-full rounded-xl">
-                Start AI Processing
-              </Button>
+              {isProcessing ? (
+                <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                  <div className="relative">
+                    <div className="h-16 w-16 rounded-full border-4 border-muted animate-spin border-t-primary" />
+                    <Brain className="h-6 w-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-sm font-semibold text-foreground animate-pulse">AI Processing in progress…</p>
+                    <p className="text-xs text-muted-foreground">Extracting metadata, analyzing obligations & generating summary</p>
+                  </div>
+                  <div className="w-full max-w-xs">
+                    <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+                      <div className="h-full rounded-full bg-primary animate-[processing_3s_ease-in-out_forwards]" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="border-2 border-dashed border-border rounded-xl p-10 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                    <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-foreground font-medium">Drag & drop your file here</p>
+                    <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
+                  </div>
+                  <Button onClick={handleNewNotification} className="w-full rounded-xl">
+                    Start AI Processing
+                  </Button>
+                </>
+              )}
             </div>
           </DialogContent>
         </Dialog>
