@@ -55,31 +55,6 @@ export default function NotificationDetail() {
         <StatusHistoryDrawer />
       </div>
 
-      {/* Stepper */}
-      <div className="bg-card border border-border rounded-lg p-5 card-glow">
-        <div className="flex items-center justify-between">
-          {stages.map((stage, i) => (
-            <div key={stage} className="flex items-center flex-1">
-              <div className="flex items-center gap-2">
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                  i < currentStage ? "bg-success text-success-foreground" :
-                  i === currentStage ? "gradient-purple text-primary-foreground glow-purple" :
-                  "bg-secondary text-muted-foreground"
-                }`}>
-                  {i < currentStage ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
-                </div>
-                <span className={`text-sm font-medium ${
-                  i <= currentStage ? "text-foreground" : "text-muted-foreground"
-                }`}>{stage}</span>
-              </div>
-              {i < stages.length - 1 && (
-                <div className={`flex-1 h-px mx-4 ${i < currentStage ? "bg-success" : "bg-border"}`} />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Stage Content */}
       {currentStage === 0 && <ProcessingStage isNew={isNew} />}
       {currentStage === 1 && <ReviewStage notification={notification} />}
