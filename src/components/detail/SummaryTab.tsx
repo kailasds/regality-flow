@@ -1,12 +1,6 @@
-import { ArrowRight, AlertTriangle, Shield, Building2, FileWarning } from "lucide-react";
+import { AlertTriangle, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const metrics = [
-  { label: "Total Obligations", value: "112", icon: FileWarning },
-  { label: "High Risk", value: "12", icon: AlertTriangle },
-  { label: "Critical Revisions", value: "4", icon: Shield },
-  { label: "Impacted Departments", value: "4", icon: Building2 },
-];
+import { ArrowRight } from "lucide-react";
 
 const departments = [
   { name: "Engineering", obligations: 42, exposure: "High" },
@@ -34,21 +28,6 @@ export default function SummaryTab() {
             Confidence: <span className="text-primary font-semibold">92%</span>
           </span>
         </div>
-      </div>
-
-      {/* Key Impact Metrics */}
-      <div className="grid grid-cols-4 gap-4">
-        {metrics.map((m) => (
-          <div key={m.label} className="bg-card border border-border rounded-lg p-5 card-glow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="h-9 w-9 rounded-lg gradient-purple-subtle flex items-center justify-center">
-                <m.icon className="h-4 w-4 text-primary" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{m.value}</p>
-            <p className="text-xs text-muted-foreground mt-1">{m.label}</p>
-          </div>
-        ))}
       </div>
 
       <div className="grid grid-cols-2 gap-6">
