@@ -33,7 +33,7 @@ export function TopBar() {
 
       <div className="flex items-center gap-4">
         <div className="text-right">
-          <p className="text-sm font-medium text-foreground">{user?.name || "Admin User"}</p>
+          <p className="text-sm font-medium text-foreground">{user?.name || "Rahul Mehta"}</p>
           <p className="text-xs text-muted-foreground">{user?.department || "Compliance"} Dept · Manager</p>
         </div>
         <DropdownMenu>

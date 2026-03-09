@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Clock, CheckCircle2, Plus, Upload, TrendingUp, TrendingDown, ChevronDown, ArrowRight, Search, Filter, Brain } from "lucide-react";
+import { FileText, Clock, CheckCircle2, Plus, Upload, ChevronDown, ArrowRight, Search, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -95,7 +95,6 @@ export default function Dashboard() {
           ? "border-primary/50 shadow-[0_0_30px_-5px_hsl(var(--primary)/0.2)]"
           : "border-border hover:border-border/80 hover:shadow-[0_8px_30px_-10px_hsl(0_0%_0%/0.3)]"
       }`}>
-        {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] to-transparent pointer-events-none" />
 
         {/* Header */}
@@ -120,7 +119,6 @@ export default function Dashboard() {
             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
               rate >= 60 ? "bg-success/15 text-success" : "bg-warning/15 text-warning"
             }`}>
-              {rate >= 60 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
               {rate}% closed
             </div>
           </div>
@@ -184,22 +182,6 @@ export default function Dashboard() {
             <BreakdownChip label="Action" value={data.action} color="bg-warning" />
           </div>
         </div>
-
-        {/* Comparison footer for previous month */}
-        {!isCurrentMonth && (
-          <div className="relative px-6 pb-5">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 w-fit">
-              {prevData.total > currentData.total ? (
-                <TrendingUp className="h-3.5 w-3.5 text-success" />
-              ) : (
-                <TrendingDown className="h-3.5 w-3.5 text-warning" />
-              )}
-              <span className="text-xs font-medium text-muted-foreground">
-                {Math.abs(currentData.total - prevData.total)} {prevData.total > currentData.total ? "more" : "fewer"} than {currentMonth}
-              </span>
-            </div>
-          </div>
-        )}
       </div>
     );
   };

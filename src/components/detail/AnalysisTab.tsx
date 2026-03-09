@@ -1,5 +1,4 @@
-import { ArrowRight, Brain, TrendingUp, AlertTriangle, Shield } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Brain, TrendingUp, Shield } from "lucide-react";
 
 const riskCards = [
   { label: "Operational Risk", level: "Medium", color: "warning" },
@@ -90,9 +89,6 @@ export default function AnalysisTab() {
               </div>
             ))}
           </div>
-          <Button className="w-full mt-5 gradient-purple border-0 text-primary-foreground glow-purple-sm">
-            Move to Review <ArrowRight className="h-4 w-4 ml-1" />
-          </Button>
         </div>
       </div>
     </div>

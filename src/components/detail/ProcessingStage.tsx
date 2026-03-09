@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, Loader2, Brain, FileText, Search, GitCompare, BarChart3, ArrowRight, Eye } from "lucide-react";
+import { CheckCircle2, Loader2, Brain, FileText, Search, GitCompare, BarChart3, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
@@ -37,7 +37,6 @@ export default function ProcessingStage({ isNew = false }: Props) {
 
   const allComplete = currentStep >= pipelineSteps.length;
 
-  // If viewing a sub-workspace tab
   if (activeTab) {
     return (
       <div className="space-y-4">
@@ -73,7 +72,6 @@ export default function ProcessingStage({ isNew = false }: Props) {
           {pipelineSteps.map((step, i) => {
             const isComplete = i < currentStep;
             const isActive = i === currentStep && processing;
-            const isPending = i > currentStep;
 
             return (
               <div key={step.id} className={`flex items-center gap-4 p-3 rounded-lg transition-all ${
@@ -111,8 +109,8 @@ export default function ProcessingStage({ isNew = false }: Props) {
 
       {/* Loading skeletons while processing */}
       {processing && (
-        <div className="grid grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
             <div key={i} className="bg-card border border-border rounded-lg p-5 card-glow">
               <Skeleton className="h-3 w-20 mb-3" />
               <Skeleton className="h-7 w-12 mb-2" />
@@ -125,7 +123,6 @@ export default function ProcessingStage({ isNew = false }: Props) {
       {/* Processing Complete Output */}
       {allComplete && (
         <>
-          {/* AI Processing Complete Header */}
           <div className="bg-card border border-border rounded-lg p-6 card-glow">
             <div className="flex items-center gap-2 mb-1">
               <CheckCircle2 className="h-5 w-5 text-success" />
@@ -134,21 +131,6 @@ export default function ProcessingStage({ isNew = false }: Props) {
             <p className="text-sm text-muted-foreground mt-1">
               This regulation introduces stricter capital adequacy reporting affecting Mortgage and Compliance departments.
             </p>
-          </div>
-
-          {/* Metrics */}
-          <div className="grid grid-cols-4 gap-4">
-            {[
-              { label: "Total Obligations", value: "112" },
-              { label: "High Risk", value: "12" },
-              { label: "Impacted Departments", value: "4" },
-              { label: "AI Confidence", value: "92%" },
-            ].map((m) => (
-              <div key={m.label} className="bg-card border border-border rounded-lg p-5 card-glow text-center">
-                <p className="text-2xl font-bold text-foreground">{m.value}</p>
-                <p className="text-xs text-muted-foreground mt-1">{m.label}</p>
-              </div>
-            ))}
           </div>
 
           {/* Workspace Access */}
@@ -170,13 +152,6 @@ export default function ProcessingStage({ isNew = false }: Props) {
                 <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
               </button>
             ))}
-          </div>
-
-          {/* Send to Review */}
-          <div className="flex justify-end">
-            <Button className="gradient-purple border-0 text-primary-foreground glow-purple-sm">
-              Send to Review <ArrowRight className="h-4 w-4 ml-1.5" />
-            </Button>
           </div>
         </>
       )}

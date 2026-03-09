@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, Send, ArrowLeft, Brain } from "lucide-react";
+import { CheckCircle2, ArrowLeft, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Notification } from "@/data/mockData";
@@ -41,19 +41,6 @@ export default function ReviewStage({ notification }: Props) {
         <div className="flex items-center gap-2 mb-3">
           <Brain className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-semibold text-foreground">AI Interpretation Summary</h3>
-        </div>
-        <div className="grid grid-cols-4 gap-4 mb-4">
-          {[
-            { label: "Total Obligations", value: "112" },
-            { label: "High Risk", value: "12" },
-            { label: "Impacted Departments", value: "4" },
-            { label: "AI Confidence", value: "92%" },
-          ].map((m) => (
-            <div key={m.label} className="text-center">
-              <p className="text-xl font-bold text-foreground">{m.value}</p>
-              <p className="text-xs text-muted-foreground">{m.label}</p>
-            </div>
-          ))}
         </div>
         <p className="text-sm text-foreground/80">
           This regulation introduces stricter capital adequacy reporting and new risk classification requirements

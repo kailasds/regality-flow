@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthContextType["user"]>(null);
 
   const login = (email: string, _password: string) => {
-    setUser({ name: "Admin User", email, department: "Compliance" });
+    setUser({ name: "Rahul Mehta", email, department: "Compliance" });
     setIsAuthenticated(true);
   };
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Flag, CheckCircle2 } from "lucide-react";
+import { Search, Flag, CheckCircle2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type RiskLevel = "High" | "Medium" | "Low";
@@ -63,7 +63,7 @@ export default function MetadataTab() {
 
       {/* Right - Obligation Explorer */}
       <div className="flex flex-col gap-4 overflow-hidden">
-        {/* Filters */}
+        {/* Filters + Edit */}
         <div className="flex items-center gap-2 flex-wrap">
           {filters.map((f) => (
             <button
@@ -78,6 +78,9 @@ export default function MetadataTab() {
               {f}
             </button>
           ))}
+          <Button size="sm" variant="outline" className="ml-auto h-7 px-2.5 text-xs gap-1 border-primary/30 text-primary hover:bg-primary/10">
+            <Pencil className="h-3 w-3" /> Edit
+          </Button>
         </div>
 
         {/* Search */}
@@ -121,7 +124,6 @@ export default function MetadataTab() {
                 <span className="text-xs text-primary">AI: {ob.confidence}%</span>
               </div>
 
-              {/* Expanded */}
               {expandedId === ob.id && (
                 <div className="mt-4 pt-4 border-t border-border space-y-3">
                   <div>

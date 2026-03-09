@@ -1,150 +1,31 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, MessageSquare, History, ThumbsUp, ThumbsDown } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useNotifications, NotificationItem } from "@/contexts/NotificationContext";
 import { toast } from "sonner";
+import AnalysisTab from "@/components/detail/AnalysisTab";
 
-const historyLog = [
-  { date: "2026-03-04 10:30", action: "AI Processing completed" },
-  { date: "2026-03-04 10:32", action: "Moved to Under Review" },
-  { date: "2026-03-04 11:00", action: "Reminder sent to Compliance Head" },
-];
-
-const TABLE_HEADERS = ["No.", "Regulator", "Date Received", "Our Reference", "Subject", "Attachment", "Month", "Actions"];
-
-function NotificationTable({
-  items,
-  onReminder,
-  onFeedback,
-  onHistory,
-  onRowClick,
-}: {
-  items: NotificationItem[];
-  onReminder: (n: NotificationItem) => void;
-  onFeedback: (n: NotificationItem) => void;
-  onHistory: (n: NotificationItem) => void;
-  onRowClick: (n: NotificationItem) => void;
-}) {
-  return (
-    <div className="bg-card border border-border rounded-lg card-glow overflow-x-auto">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-border">
-            {TABLE_HEADERS.map((h) => (
-              <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((n, idx) => (
-            <tr
-              key={n.id}
-              className="border-b border-border last:border-0 hover:bg-secondary/50 transition-colors"
-            >
-              <td
-                className="px-4 py-3.5 text-sm font-mono text-primary cursor-pointer hover:underline"
-                onClick={() => onRowClick(n)}
-              >
-                {idx + 1}
-              </td>
-              <td className="px-4 py-3.5 text-sm text-foreground">{n.regulator}</td>
-              <td className="px-4 py-3.5 text-sm text-muted-foreground">{n.dateReceived}</td>
-              <td className="px-4 py-3.5 text-sm font-mono text-muted-foreground">{n.reference}</td>
-              <td
-                className="px-4 py-3.5 text-sm text-foreground cursor-pointer hover:text-primary"
-                onClick={() => onRowClick(n)}
-              >
-                {n.subject}
-              </td>
-              <td className="px-4 py-3.5">
-                {n.attachment ? (
-                  <span className="text-xs text-primary hover:underline cursor-pointer">{n.attachment}</span>
-                ) : (
-                  <span className="text-xs text-muted-foreground">—</span>
-                )}
-              </td>
-              <td className="px-4 py-3.5 text-sm text-muted-foreground">{n.month}</td>
-              <td className="px-4 py-3.5">
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 px-2.5 text-xs gap-1 border-primary/30 text-primary hover:bg-primary/10"
-                    onClick={(e) => { e.stopPropagation(); onReminder(n); }}
-                  >
-                    <Bell className="h-3 w-3" /> Reminder
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 px-2.5 text-xs gap-1 border-success/30 text-success hover:bg-success/10"
-                    onClick={(e) => { e.stopPropagation(); onFeedback(n); }}
-                  >
-                    <MessageSquare className="h-3 w-3" /> Feedback
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 px-2 text-xs gap-1 text-muted-foreground hover:text-foreground"
-                    onClick={(e) => { e.stopPropagation(); onHistory(n); }}
-                  >
-                    <History className="h-3 w-3" /> History
-                  </Button>
-                </div>
-              </td>
-            </tr>
-          ))}
-          {items.length === 0 && (
-            <tr>
-              <td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">
-                No notifications in this category
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+const TABLE_HEADERS_PROCESSING = ["No.", "Regulator", "Date Received", "Our Reference", "Subject", "Attachment", "Month", "Actions"];
+const TABLE_HEADERS_REVIEW = ["No.", "Regulator", "Date Received", "Our Reference", "Subject", "Attachment", "Month"];
+const TABLE_HEADERS_ACTION = ["No.", "Regulator", "Date Received", "Our Reference", "Subject", "Attachment", "Month"];
 
 export default function PendingNotifications() {
   const navigate = useNavigate();
-  const { getByStatus, moveNotification } = useNotifications();
-  const [feedbackTarget, setFeedbackTarget] = useState<NotificationItem | null>(null);
-  const [historyTarget, setHistoryTarget] = useState<NotificationItem | null>(null);
+  const { getByStatus } = useNotifications();
   const [activeTab, setActiveTab] = useState("under-review");
+  const [analysisTarget, setAnalysisTarget] = useState<NotificationItem | null>(null);
 
   const forProcessing = getByStatus("For Processing");
   const underReview = getByStatus("Under Review");
   const forAction = getByStatus("For Action");
 
-  const handleReminder = (n: NotificationItem) => {
-    toast.info("Reminder sent", {
-      description: `Reminder sent to higher authority for ${n.id} — ${n.subject}`,
+  const handleRegenerate = (n: NotificationItem) => {
+    toast.info("Regenerating AI analysis", {
+      description: `Re-processing ${n.id} — ${n.subject}`,
     });
-  };
-
-  const handlePositiveFeedback = (n: NotificationItem) => {
-    if (n.subStatus === "Under Review") {
-      moveNotification(n.id, "For Action");
-    } else if (n.subStatus === "For Action") {
-      moveNotification(n.id, "Processed");
-    } else if (n.subStatus === "For Processing") {
-      moveNotification(n.id, "Under Review");
-    }
-    setFeedbackTarget(null);
-  };
-
-  const handleNegativeFeedback = (n: NotificationItem) => {
-    if (n.subStatus === "Under Review" || n.subStatus === "For Action") {
-      moveNotification(n.id, "For Processing");
-    }
-    setFeedbackTarget(null);
   };
 
   const handleRowClick = (n: NotificationItem) => {
@@ -171,93 +52,119 @@ export default function PendingNotifications() {
           </TabsTrigger>
         </TabsList>
 
+        {/* For Processing - only Regenerate button */}
         <TabsContent value="for-processing">
-          <NotificationTable
-            items={forProcessing}
-            onReminder={handleReminder}
-            onFeedback={setFeedbackTarget}
-            onHistory={setHistoryTarget}
-            onRowClick={handleRowClick}
-          />
+          <div className="bg-card border border-border rounded-lg card-glow overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  {TABLE_HEADERS_PROCESSING.map((h) => (
+                    <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {forProcessing.map((n, idx) => (
+                  <tr key={n.id} className="border-b border-border last:border-0 hover:bg-secondary/50 transition-colors">
+                    <td className="px-4 py-3.5 text-sm font-mono text-primary cursor-pointer hover:underline" onClick={() => handleRowClick(n)}>{idx + 1}</td>
+                    <td className="px-4 py-3.5 text-sm text-foreground">{n.regulator}</td>
+                    <td className="px-4 py-3.5 text-sm text-muted-foreground">{n.dateReceived}</td>
+                    <td className="px-4 py-3.5 text-sm font-mono text-muted-foreground">{n.reference}</td>
+                    <td className="px-4 py-3.5 text-sm text-foreground cursor-pointer hover:text-primary" onClick={() => handleRowClick(n)}>{n.subject}</td>
+                    <td className="px-4 py-3.5">{n.attachment ? <span className="text-xs text-primary">{n.attachment}</span> : <span className="text-xs text-muted-foreground">—</span>}</td>
+                    <td className="px-4 py-3.5 text-sm text-muted-foreground">{n.month}</td>
+                    <td className="px-4 py-3.5">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2.5 text-xs gap-1 border-primary/30 text-primary hover:bg-primary/10"
+                        onClick={(e) => { e.stopPropagation(); handleRegenerate(n); }}
+                      >
+                        <RefreshCw className="h-3 w-3" /> Regenerate
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+                {forProcessing.length === 0 && (
+                  <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground text-sm">No notifications in this category</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </TabsContent>
 
+        {/* Under Review - click navigates to detail */}
         <TabsContent value="under-review">
-          <NotificationTable
-            items={underReview}
-            onReminder={handleReminder}
-            onFeedback={setFeedbackTarget}
-            onHistory={setHistoryTarget}
-            onRowClick={handleRowClick}
-          />
+          <div className="bg-card border border-border rounded-lg card-glow overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  {TABLE_HEADERS_REVIEW.map((h) => (
+                    <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {underReview.map((n, idx) => (
+                  <tr key={n.id} className="border-b border-border last:border-0 hover:bg-secondary/50 cursor-pointer transition-colors" onClick={() => handleRowClick(n)}>
+                    <td className="px-4 py-3.5 text-sm font-mono text-primary">{idx + 1}</td>
+                    <td className="px-4 py-3.5 text-sm text-foreground">{n.regulator}</td>
+                    <td className="px-4 py-3.5 text-sm text-muted-foreground">{n.dateReceived}</td>
+                    <td className="px-4 py-3.5 text-sm font-mono text-muted-foreground">{n.reference}</td>
+                    <td className="px-4 py-3.5 text-sm text-foreground">{n.subject}</td>
+                    <td className="px-4 py-3.5">{n.attachment ? <span className="text-xs text-primary">{n.attachment}</span> : <span className="text-xs text-muted-foreground">—</span>}</td>
+                    <td className="px-4 py-3.5 text-sm text-muted-foreground">{n.month}</td>
+                  </tr>
+                ))}
+                {underReview.length === 0 && (
+                  <tr><td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">No notifications in this category</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </TabsContent>
 
+        {/* For Action - click shows analysis dialog */}
         <TabsContent value="for-action">
-          <NotificationTable
-            items={forAction}
-            onReminder={handleReminder}
-            onFeedback={setFeedbackTarget}
-            onHistory={setHistoryTarget}
-            onRowClick={handleRowClick}
-          />
+          <div className="bg-card border border-border rounded-lg card-glow overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  {TABLE_HEADERS_ACTION.map((h) => (
+                    <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {forAction.map((n, idx) => (
+                  <tr key={n.id} className="border-b border-border last:border-0 hover:bg-secondary/50 cursor-pointer transition-colors" onClick={() => setAnalysisTarget(n)}>
+                    <td className="px-4 py-3.5 text-sm font-mono text-primary">{idx + 1}</td>
+                    <td className="px-4 py-3.5 text-sm text-foreground">{n.regulator}</td>
+                    <td className="px-4 py-3.5 text-sm text-muted-foreground">{n.dateReceived}</td>
+                    <td className="px-4 py-3.5 text-sm font-mono text-muted-foreground">{n.reference}</td>
+                    <td className="px-4 py-3.5 text-sm text-foreground">{n.subject}</td>
+                    <td className="px-4 py-3.5">{n.attachment ? <span className="text-xs text-primary">{n.attachment}</span> : <span className="text-xs text-muted-foreground">—</span>}</td>
+                    <td className="px-4 py-3.5 text-sm text-muted-foreground">{n.month}</td>
+                  </tr>
+                ))}
+                {forAction.length === 0 && (
+                  <tr><td colSpan={7} className="px-5 py-8 text-center text-muted-foreground text-sm">No notifications in this category</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </TabsContent>
       </Tabs>
 
-      {/* Feedback Dialog */}
-      <Dialog open={!!feedbackTarget} onOpenChange={() => setFeedbackTarget(null)}>
-        <DialogContent className="bg-card border-border">
+      {/* Analysis Dialog for For Action */}
+      <Dialog open={!!analysisTarget} onOpenChange={() => setAnalysisTarget(null)}>
+        <DialogContent className="bg-card border-border max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Provide Feedback</DialogTitle>
-            <DialogDescription>
-              {feedbackTarget?.id} — {feedbackTarget?.subject}
-            </DialogDescription>
+            <DialogTitle>Analysis — {analysisTarget?.subject}</DialogTitle>
+            <DialogDescription>{analysisTarget?.id} · {analysisTarget?.regulator}</DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 mt-4">
-            <p className="text-sm text-muted-foreground">
-              {feedbackTarget?.subStatus === "Under Review"
-                ? "Positive feedback will move this to For Action. Negative will send it back to For Processing for rerun."
-                : feedbackTarget?.subStatus === "For Action"
-                ? "Positive feedback will move this to Processed. Negative will send it back to For Processing for rerun."
-                : "Positive feedback will move this to Under Review."}
-            </p>
-            <div className="flex gap-3">
-              <Button
-                className="flex-1 gap-2 bg-success/15 text-success hover:bg-success/25 border border-success/30"
-                variant="outline"
-                onClick={() => feedbackTarget && handlePositiveFeedback(feedbackTarget)}
-              >
-                <ThumbsUp className="h-4 w-4" /> Approve
-              </Button>
-              <Button
-                className="flex-1 gap-2 bg-destructive/15 text-destructive hover:bg-destructive/25 border border-destructive/30"
-                variant="outline"
-                onClick={() => feedbackTarget && handleNegativeFeedback(feedbackTarget)}
-              >
-                <ThumbsDown className="h-4 w-4" /> Reject
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* History Dialog */}
-      <Dialog open={!!historyTarget} onOpenChange={() => setHistoryTarget(null)}>
-        <DialogContent className="bg-card border-border">
-          <DialogHeader>
-            <DialogTitle>Status History</DialogTitle>
-            <DialogDescription>
-              {historyTarget?.id} — {historyTarget?.subject}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4 space-y-3">
-            {historyLog.map((entry, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="h-2 w-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                <div>
-                  <p className="text-sm text-foreground">{entry.action}</p>
-                  <p className="text-xs text-muted-foreground">{entry.date}</p>
-                </div>
-              </div>
-            ))}
+          <div className="mt-4">
+            <AnalysisTab />
           </div>
         </DialogContent>
       </Dialog>
