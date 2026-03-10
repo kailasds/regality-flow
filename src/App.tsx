@@ -14,6 +14,9 @@ import PendingNotifications from "./pages/PendingNotifications";
 import ProcessedNotifications from "./pages/ProcessedNotifications";
 import ClosedNotifications from "./pages/ClosedNotifications";
 import NotificationDetail from "./pages/NotificationDetail";
+import ViewAnalysis from "./pages/ViewAnalysis";
+import ViewMetadata from "./pages/ViewMetadata";
+import ViewComparison from "./pages/ViewComparison";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -41,6 +44,9 @@ const AppRoutes = () => (
       <Route path="/processed" element={<ProcessedNotifications />} />
       <Route path="/closed" element={<ClosedNotifications />} />
       <Route path="/notifications/:id" element={<NotificationDetail />} />
+      <Route path="/notifications/:id/analysis" element={<ViewAnalysis />} />
+      <Route path="/notifications/:id/metadata" element={<ViewMetadata />} />
+      <Route path="/notifications/:id/comparison" element={<ViewComparison />} />
       <Route path="/settings" element={<Settings />} />
     </Route>
     <Route path="*" element={<NotFound />} />
