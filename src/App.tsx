@@ -14,6 +14,9 @@ import PendingNotifications from "./pages/PendingNotifications";
 import ProcessedNotifications from "./pages/ProcessedNotifications";
 import ClosedNotifications from "./pages/ClosedNotifications";
 import NotificationDetail from "./pages/NotificationDetail";
+import ViewAnalysis from "./pages/ViewAnalysis";
+import ViewMetadata from "./pages/ViewMetadata";
+import ViewComparison from "./pages/ViewComparison";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
