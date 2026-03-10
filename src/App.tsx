@@ -44,6 +44,9 @@ const AppRoutes = () => (
       <Route path="/processed" element={<ProcessedNotifications />} />
       <Route path="/closed" element={<ClosedNotifications />} />
       <Route path="/notifications/:id" element={<NotificationDetail />} />
+      <Route path="/notifications/:id/analysis" element={<ViewAnalysis />} />
+      <Route path="/notifications/:id/metadata" element={<ViewMetadata />} />
+      <Route path="/notifications/:id/comparison" element={<ViewComparison />} />
       <Route path="/settings" element={<Settings />} />
     </Route>
     <Route path="*" element={<NotFound />} />
