@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { RefreshCw, MessageSquare, Bell, History } from "lucide-react";
+import { RefreshCw, MessageSquare, Bell, History, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useNotifications, NotificationItem } from "@/contexts/NotificationContext";
 import { toast } from "sonner";
 
@@ -11,8 +12,10 @@ const TABLE_HEADERS_WITH_ACTIONS = ["No.", "Regulator", "Date Received", "Our Re
 
 export default function PendingNotifications() {
   const navigate = useNavigate();
-  const { getByStatus } = useNotifications();
+  const { getByStatus, moveNotification } = useNotifications();
   const [activeTab, setActiveTab] = useState("under-review");
+  const [feedbackTarget, setFeedbackTarget] = useState<NotificationItem | null>(null);
+  const [feedbackComment, setFeedbackComment] = useState("");
 
   const forProcessing = getByStatus("For Processing");
   const underReview = getByStatus("Under Review");
@@ -22,8 +25,20 @@ export default function PendingNotifications() {
     toast.info("Regenerating AI analysis", { description: `Re-processing ${n.id} — ${n.subject}` });
   };
 
-  const handleFeedback = (n: NotificationItem) => {
-    toast.info("Feedback submitted", { description: `Feedback recorded for ${n.id}` });
+  const handleOpenFeedback = (n: NotificationItem) => {
+    setFeedbackTarget(n);
+    setFeedbackComment("");
+  };
+
+  const handleFeedbackSubmit = (positive: boolean) => {
+    if (!feedbackTarget) return;
+    if (positive) {
+      moveNotification(feedbackTarget.id, "For Action");
+    } else {
+      moveNotification(feedbackTarget.id, "For Processing");
+    }
+    setFeedbackTarget(null);
+    setFeedbackComment("");
   };
 
   const handleReminder = (n: NotificationItem) => {
@@ -40,7 +55,7 @@ export default function PendingNotifications() {
 
   const renderActionButtons = (n: NotificationItem) => (
     <div className="flex items-center gap-1">
-      <Button size="sm" variant="outline" className="h-7 px-2 text-xs gap-1 border-border" onClick={(e) => { e.stopPropagation(); handleFeedback(n); }}>
+      <Button size="sm" variant="outline" className="h-7 px-2 text-xs gap-1 border-border" onClick={(e) => { e.stopPropagation(); handleOpenFeedback(n); }}>
         <MessageSquare className="h-3 w-3" /> Feedback
       </Button>
       <Button size="sm" variant="outline" className="h-7 px-2 text-xs gap-1 border-border" onClick={(e) => { e.stopPropagation(); handleReminder(n); }}>
@@ -112,7 +127,7 @@ export default function PendingNotifications() {
           </div>
         </TabsContent>
 
-        {/* Under Review - row navigates to detail, has feedback/remind/history */}
+        {/* Under Review */}
         <TabsContent value="under-review">
           <div className="bg-card border border-border rounded-lg card-glow overflow-x-auto">
             <table className="w-full">
@@ -128,7 +143,7 @@ export default function PendingNotifications() {
           </div>
         </TabsContent>
 
-        {/* For Action - row navigates to analysis page, has feedback/remind/history */}
+        {/* For Action */}
         <TabsContent value="for-action">
           <div className="bg-card border border-border rounded-lg card-glow overflow-x-auto">
             <table className="w-full">
@@ -144,6 +159,43 @@ export default function PendingNotifications() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Feedback Dialog */}
+      <Dialog open={!!feedbackTarget} onOpenChange={() => setFeedbackTarget(null)}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Submit Feedback</DialogTitle>
+            <DialogDescription>{feedbackTarget?.id} — {feedbackTarget?.subject}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <label className="text-xs text-muted-foreground mb-1.5 block">Comments (optional)</label>
+              <textarea
+                className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none h-20"
+                placeholder="Add any comments about this notification…"
+                value={feedbackComment}
+                onChange={(e) => setFeedbackComment(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-3">
+              <Button
+                className="flex-1 bg-success/15 text-success hover:bg-success/25 border border-success/30 gap-2"
+                onClick={() => handleFeedbackSubmit(true)}
+              >
+                <ThumbsUp className="h-4 w-4" /> Approve
+                <span className="text-[10px] opacity-70 ml-1">→ For Action</span>
+              </Button>
+              <Button
+                className="flex-1 bg-destructive/15 text-destructive hover:bg-destructive/25 border border-destructive/30 gap-2"
+                onClick={() => handleFeedbackSubmit(false)}
+              >
+                <ThumbsDown className="h-4 w-4" /> Reject
+                <span className="text-[10px] opacity-70 ml-1">→ Re-process</span>
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
