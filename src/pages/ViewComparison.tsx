@@ -20,19 +20,14 @@ export default function ViewComparison() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-4 w-4 mr-1" /> Back
-          </Button>
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">{notification.id} — {notification.subject}</h2>
-            <p className="text-xs text-muted-foreground">{notification.regulator}</p>
-          </div>
-        </div>
+      <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
-          ← Back
+          <ArrowLeft className="h-4 w-4 mr-1" /> Back
         </Button>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">{notification.id} — {notification.subject}</h2>
+          <p className="text-xs text-muted-foreground">{notification.regulator}</p>
+        </div>
       </div>
 
       {/* Excel Viewer Header */}
