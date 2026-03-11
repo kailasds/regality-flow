@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import PendingNotifications from "./pages/PendingNotifications";
 import ProcessedNotifications from "./pages/ProcessedNotifications";
+import ProcessedNotificationDetail from "./pages/ProcessedNotificationDetail";
 import ClosedNotifications from "./pages/ClosedNotifications";
 import NotificationDetail from "./pages/NotificationDetail";
 import ViewAnalysis from "./pages/ViewAnalysis";
@@ -42,6 +43,7 @@ const AppRoutes = () => (
       <Route path="/" element={<Dashboard />} />
       <Route path="/pending" element={<PendingNotifications />} />
       <Route path="/processed" element={<ProcessedNotifications />} />
+      <Route path="/processed/:id" element={<ProcessedNotificationDetail />} />
       <Route path="/closed" element={<ClosedNotifications />} />
       <Route path="/notifications/:id" element={<NotificationDetail />} />
       <Route path="/notifications/:id/analysis" element={<ViewAnalysis />} />

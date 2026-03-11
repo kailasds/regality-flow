@@ -1,10 +1,9 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { notifications } from "@/data/mockData";
 import StatusHistoryDrawer from "@/components/detail/StatusHistoryDrawer";
 import ProcessingStage from "@/components/detail/ProcessingStage";
-import ReviewStage from "@/components/detail/ReviewStage";
 import ActionStage from "@/components/detail/ActionStage";
 import ClosedStage from "@/components/detail/ClosedStage";
 
@@ -17,7 +16,6 @@ function getStageIndex(subStatus: string) {
   return 3;
 }
 
-// Demo notification for new uploads
 const demoNotification = {
   id: "N-1056",
   regulator: "RBI",
@@ -44,7 +42,7 @@ export default function NotificationDetail() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/notifications")} className="text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4 mr-1" /> Back
           </Button>
           <div>
@@ -55,9 +53,8 @@ export default function NotificationDetail() {
         <StatusHistoryDrawer />
       </div>
 
-      {/* Stage Content */}
-      {currentStage === 0 && <ProcessingStage isNew={isNew} />}
-      {currentStage === 1 && <ReviewStage notification={notification} />}
+      {/* Stage Content - Under Review now shows ProcessingStage (completed) */}
+      {(currentStage === 0 || currentStage === 1) && <ProcessingStage isNew={isNew} />}
       {currentStage === 2 && <ActionStage notification={notification} />}
       {currentStage === 3 && <ClosedStage />}
     </div>

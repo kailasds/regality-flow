@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { MessageSquare, Bell, History } from "lucide-react";
+import { MessageSquare, Bell, History, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNotifications, NotificationItem } from "@/contexts/NotificationContext";
 import { toast } from "sonner";
@@ -8,15 +8,11 @@ const TABLE_HEADERS = ["No.", "Regulator", "Date Received", "Our Reference", "Su
 
 export default function ProcessedNotifications() {
   const navigate = useNavigate();
-  const { getByStatus } = useNotifications();
+  const { getByStatus, moveNotification } = useNotifications();
   const processed = getByStatus("Processed");
 
-  const handleFeedback = (n: NotificationItem) => {
-    toast.info("Feedback submitted", { description: `Feedback recorded for ${n.id}` });
-  };
-
-  const handleReminder = (n: NotificationItem) => {
-    toast.success("Reminder sent", { description: `Reminder sent for ${n.id}` });
+  const handleClose = (n: NotificationItem) => {
+    moveNotification(n.id, "Closed");
   };
 
   const handleHistory = (n: NotificationItem) => {
@@ -41,7 +37,7 @@ export default function ProcessedNotifications() {
           </thead>
           <tbody>
             {processed.map((n, idx) => (
-              <tr key={n.id} className="border-b border-border last:border-0 hover:bg-secondary/50 cursor-pointer transition-colors" onClick={() => navigate(`/notifications/${n.id}/metadata`)}>
+              <tr key={n.id} className="border-b border-border last:border-0 hover:bg-secondary/50 cursor-pointer transition-colors" onClick={() => navigate(`/processed/${n.id}`)}>
                 <td className="px-4 py-3.5 text-sm font-mono text-primary">{idx + 1}</td>
                 <td className="px-4 py-3.5 text-sm text-foreground">{n.regulator}</td>
                 <td className="px-4 py-3.5 text-sm text-muted-foreground">{n.dateReceived}</td>
@@ -51,11 +47,8 @@ export default function ProcessedNotifications() {
                 <td className="px-4 py-3.5 text-sm text-muted-foreground">{n.month}</td>
                 <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-1">
-                    <Button size="sm" variant="outline" className="h-7 px-2 text-xs gap-1 border-border" onClick={() => handleFeedback(n)}>
-                      <MessageSquare className="h-3 w-3" /> Feedback
-                    </Button>
-                    <Button size="sm" variant="outline" className="h-7 px-2 text-xs gap-1 border-border" onClick={() => handleReminder(n)}>
-                      <Bell className="h-3 w-3" /> Remind
+                    <Button size="sm" variant="outline" className="h-7 px-2 text-xs gap-1 border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => handleClose(n)}>
+                      <XCircle className="h-3 w-3" /> Close
                     </Button>
                     <Button size="sm" variant="outline" className="h-7 px-2 text-xs gap-1 border-border" onClick={() => handleHistory(n)}>
                       <History className="h-3 w-3" /> History
