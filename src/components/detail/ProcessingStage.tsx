@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
-import { CheckCircle2, Loader2, Brain, FileText, Search, GitCompare, BarChart3, Eye } from "lucide-react";
+import { CheckCircle2, Loader2, Brain, FileText, Search, GitCompare, BarChart3, Eye, Pencil } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MetadataTab from "@/components/detail/MetadataTab";
-import AnalysisTab from "@/components/detail/AnalysisTab";
-import ComparisonTab from "@/components/detail/ComparisonTab";
 
 const pipelineSteps = [
   { id: 1, label: "Extracting Metadata", icon: FileText, log: "Parsing document structure…" },
@@ -21,9 +18,10 @@ interface Props {
 }
 
 export default function ProcessingStage({ isNew = false }: Props) {
+  const navigate = useNavigate();
+  const { id } = useParams();
   const [currentStep, setCurrentStep] = useState(isNew ? 0 : 5);
   const [processing, setProcessing] = useState(isNew);
-  const [activeTab, setActiveTab] = useState<string | null>(null);
 
   useEffect(() => {
     if (!processing) return;
@@ -36,26 +34,6 @@ export default function ProcessingStage({ isNew = false }: Props) {
   }, [currentStep, processing]);
 
   const allComplete = currentStep >= pipelineSteps.length;
-
-  if (activeTab) {
-    return (
-      <div className="space-y-4">
-        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground" onClick={() => setActiveTab(null)}>
-          ← Back to Processing Overview
-        </Button>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-secondary border border-border rounded-lg w-full justify-start px-1">
-            <TabsTrigger value="metadata" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary">Metadata</TabsTrigger>
-            <TabsTrigger value="analysis" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary">Analysis</TabsTrigger>
-            <TabsTrigger value="comparison" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary">Comparison</TabsTrigger>
-          </TabsList>
-          <TabsContent value="metadata" className="mt-6"><MetadataTab /></TabsContent>
-          <TabsContent value="analysis" className="mt-6"><AnalysisTab /></TabsContent>
-          <TabsContent value="comparison" className="mt-6"><ComparisonTab /></TabsContent>
-        </Tabs>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -133,24 +111,41 @@ export default function ProcessingStage({ isNew = false }: Props) {
             </p>
           </div>
 
-          {/* Workspace Access */}
+          {/* Workspace Access with Edit buttons */}
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label: "View Metadata", desc: "Review extracted obligations & fields", tab: "metadata" },
-              { label: "View Analysis", desc: "AI reasoning & risk breakdown", tab: "analysis" },
-              { label: "View Comparison", desc: "Version diff & change detection", tab: "comparison" },
+              { label: "View Metadata", desc: "Review extracted obligations & fields", route: `/notifications/${id}/metadata` },
+              { label: "View Analysis", desc: "AI reasoning & risk breakdown", route: `/notifications/${id}/analysis` },
+              { label: "View Comparison", desc: "Version diff & change detection", route: `/notifications/${id}/comparison` },
             ].map((item) => (
-              <button
-                key={item.tab}
-                onClick={() => setActiveTab(item.tab)}
+              <div
+                key={item.label}
                 className="bg-card border border-border rounded-lg p-5 card-glow text-left hover:border-primary/40 transition-all group"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-1">
                   <h4 className="text-sm font-semibold text-foreground">{item.label}</h4>
                   <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
-              </button>
+                <p className="text-xs text-muted-foreground mb-3">{item.desc}</p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-3 text-xs gap-1 border-border flex-1"
+                    onClick={() => navigate(item.route)}
+                  >
+                    <Eye className="h-3 w-3" /> View
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-3 text-xs gap-1 border-primary/30 text-primary hover:bg-primary/10"
+                    onClick={() => navigate(item.route)}
+                  >
+                    <Pencil className="h-3 w-3" /> Edit
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         </>
