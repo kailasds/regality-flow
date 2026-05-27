@@ -33,7 +33,8 @@ export default function PendingNotifications() {
   const handleFeedbackSubmit = (positive: boolean) => {
     if (!feedbackTarget) return;
     if (positive) {
-      moveNotification(feedbackTarget.id, "For Action");
+      const next = feedbackTarget.subStatus === "For Action" ? "Processed" : "For Action";
+      moveNotification(feedbackTarget.id, next);
     } else {
       moveNotification(feedbackTarget.id, "For Processing");
     }
@@ -183,7 +184,9 @@ export default function PendingNotifications() {
                 onClick={() => handleFeedbackSubmit(true)}
               >
                 <ThumbsUp className="h-4 w-4" /> Approve
-                <span className="text-[10px] opacity-70 ml-1">→ For Action</span>
+                <span className="text-[10px] opacity-70 ml-1">
+                  → {feedbackTarget?.subStatus === "For Action" ? "Processed" : "For Action"}
+                </span>
               </Button>
               <Button
                 className="flex-1 bg-destructive/15 text-destructive hover:bg-destructive/25 border border-destructive/30 gap-2"
