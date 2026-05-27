@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, Clock, CheckCircle2, Plus, Upload, ChevronDown, ArrowRight, Search, Brain, TrendingUp, Activity } from "lucide-react";
+import { FileText, Clock, CheckCircle2, Plus, Upload, ChevronDown, ArrowRight, Search, Brain, TrendingUp, Activity, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
