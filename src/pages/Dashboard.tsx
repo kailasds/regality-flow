@@ -275,6 +275,68 @@ export default function Dashboard() {
         {renderCard("Previous Month", "Historical comparison", prevData, prevMonth, false)}
       </div>
 
+      {/* Notification Table (directly under cards) */}
+      <div className={`overflow-hidden transition-all duration-300 ease-out ${
+        tableFilter ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+      }`}>
+        {tableFilter && (
+          <div className="bg-card border border-border rounded-2xl">
+            <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between gap-4">
+              <h3 className="text-sm font-semibold text-foreground whitespace-nowrap">
+                {tableFilter} Notifications
+              </h3>
+              <div className="flex items-center gap-3 flex-1 justify-end">
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by ID or subject..."
+                    value={tableSearch}
+                    onChange={(e) => setTableSearch(e.target.value)}
+                    className="pl-9 h-8 text-xs bg-secondary border-border/50"
+                  />
+                </div>
+                <button onClick={() => setTableFilter(null)} className="text-xs text-primary hover:underline whitespace-nowrap">
+                  Clear filter
+                </button>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border/50">
+                    {["ID", "Regulator", "Subject", "Status", "Department", "Date", "Analyst"].map((h) => (
+                      <th key={h} className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredNotifications.map((n) => (
+                    <tr key={n.id} className="border-b border-border/30 last:border-0 hover:bg-secondary/50 cursor-pointer transition-colors" onClick={() => navigate(`/notifications/${n.id}`)}>
+                      <td className="px-6 py-3.5 text-sm font-mono text-primary">{n.id}</td>
+                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.regulator}</td>
+                      <td className="px-6 py-3.5 text-sm text-foreground">{n.subject}</td>
+                      <td className="px-6 py-3.5">
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          n.subStatus === "Closed" ? "bg-success/15 text-success"
+                          : n.subStatus === "For Action" ? "bg-warning/15 text-warning"
+                          : "bg-primary/15 text-primary"
+                        }`}>{n.subStatus}</span>
+                      </td>
+                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.department}</td>
+                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.dateReceived}</td>
+                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.assignedTo}</td>
+                    </tr>
+                  ))}
+                  {filteredNotifications.length === 0 && (
+                    <tr><td colSpan={7} className="px-6 py-10 text-center text-muted-foreground text-sm">No notifications found for {tableFilter}</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Trend chart */}
@@ -411,67 +473,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Notification Table */}
-      <div className={`overflow-hidden transition-all duration-300 ease-out ${
-        tableFilter ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
-      }`}>
-        {tableFilter && (
-          <div className="bg-card border border-border rounded-2xl">
-            <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between gap-4">
-              <h3 className="text-sm font-semibold text-foreground whitespace-nowrap">
-                {tableFilter} Notifications
-              </h3>
-              <div className="flex items-center gap-3 flex-1 justify-end">
-                <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by ID or subject..."
-                    value={tableSearch}
-                    onChange={(e) => setTableSearch(e.target.value)}
-                    className="pl-9 h-8 text-xs bg-secondary border-border/50"
-                  />
-                </div>
-                <button onClick={() => setTableFilter(null)} className="text-xs text-primary hover:underline whitespace-nowrap">
-                  Clear filter
-                </button>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border/50">
-                    {["ID", "Regulator", "Subject", "Status", "Department", "Date", "Analyst"].map((h) => (
-                      <th key={h} className="text-left px-6 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredNotifications.map((n) => (
-                    <tr key={n.id} className="border-b border-border/30 last:border-0 hover:bg-secondary/50 cursor-pointer transition-colors" onClick={() => navigate(`/notifications/${n.id}`)}>
-                      <td className="px-6 py-3.5 text-sm font-mono text-primary">{n.id}</td>
-                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.regulator}</td>
-                      <td className="px-6 py-3.5 text-sm text-foreground">{n.subject}</td>
-                      <td className="px-6 py-3.5">
-                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          n.subStatus === "Closed" ? "bg-success/15 text-success"
-                          : n.subStatus === "For Action" ? "bg-warning/15 text-warning"
-                          : "bg-primary/15 text-primary"
-                        }`}>{n.subStatus}</span>
-                      </td>
-                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.department}</td>
-                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.dateReceived}</td>
-                      <td className="px-6 py-3.5 text-sm text-muted-foreground">{n.assignedTo}</td>
-                    </tr>
-                  ))}
-                  {filteredNotifications.length === 0 && (
-                    <tr><td colSpan={7} className="px-6 py-10 text-center text-muted-foreground text-sm">No notifications found for {tableFilter}</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
