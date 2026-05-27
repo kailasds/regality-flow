@@ -1,11 +1,27 @@
 import { useState } from "react";
-import { FileText, Clock, CheckCircle2, Plus, Upload, ChevronDown, ArrowRight, Search, Brain } from "lucide-react";
+import { FileText, Clock, CheckCircle2, Plus, Upload, ChevronDown, ArrowRight, Search, Brain, TrendingUp, Activity, BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useNotifications } from "@/contexts/NotificationContext";
+import AIProcessingAnimation from "@/components/AIProcessingAnimation";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  BarChart,
+  Bar,
+} from "recharts";
 
 const months = [
   "January", "February", "March", "April", "May", "June",
@@ -28,6 +44,32 @@ const monthData: Record<string, { total: number; closed: number; processing: num
 };
 
 const currentMonth = "March";
+
+const trendData = [
+  { month: "Sep", received: 76, closed: 61 },
+  { month: "Oct", received: 78, closed: 62 },
+  { month: "Nov", received: 85, closed: 68 },
+  { month: "Dec", received: 92, closed: 74 },
+  { month: "Jan", received: 94, closed: 70 },
+  { month: "Feb", received: 110, closed: 83 },
+  { month: "Mar", received: 128, closed: 76 },
+];
+
+const regulatorData = [
+  { name: "RBI", value: 58, color: "hsl(var(--primary))" },
+  { name: "SEBI", value: 39, color: "hsl(var(--accent))" },
+  { name: "IRDAI", value: 22, color: "hsl(var(--warning))" },
+  { name: "Others", value: 9, color: "hsl(var(--muted-foreground))" },
+];
+
+const departmentData = [
+  { dept: "Compliance", count: 34 },
+  { dept: "Risk", count: 26 },
+  { dept: "Legal", count: 22 },
+  { dept: "Finance", count: 18 },
+  { dept: "Treasury", count: 14 },
+  { dept: "Mortgage", count: 14 },
+];
 
 function BreakdownChip({ label, value, color }: { label: string; value: number; color: string }) {
   return (
@@ -61,6 +103,9 @@ export default function Dashboard() {
 
   const handleNewNotification = () => {
     setIsProcessing(true);
+  };
+
+  const handleAIComplete = () => {
     setTimeout(() => {
       setIsProcessing(false);
       setModalOpen(false);
@@ -71,7 +116,7 @@ export default function Dashboard() {
         attachment: "Capital_Framework.pdf",
       });
       navigate("/pending");
-    }, 3000);
+    }, 600);
   };
 
   const toggleFilter = (month: string) => {
@@ -206,21 +251,7 @@ export default function Dashboard() {
             </DialogHeader>
             <div className="mt-4 space-y-4">
               {isProcessing ? (
-                <div className="flex flex-col items-center justify-center py-10 space-y-4">
-                  <div className="relative">
-                    <div className="h-16 w-16 rounded-full border-4 border-muted animate-spin border-t-primary" />
-                    <Brain className="h-6 w-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                  </div>
-                  <div className="text-center space-y-1">
-                    <p className="text-sm font-semibold text-foreground animate-pulse">AI Processing in progress…</p>
-                    <p className="text-xs text-muted-foreground">Extracting metadata, analyzing obligations & generating summary</p>
-                  </div>
-                  <div className="w-full max-w-xs">
-                    <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
-                      <div className="h-full rounded-full bg-primary animate-[processing_3s_ease-in-out_forwards]" />
-                    </div>
-                  </div>
-                </div>
+                <AIProcessingAnimation stepDuration={700} onComplete={handleAIComplete} />
               ) : (
                 <>
                   <div className="border-2 border-dashed border-border rounded-xl p-10 text-center hover:border-primary/50 transition-colors cursor-pointer">
@@ -242,6 +273,142 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {renderCard("March Report", "Current month overview", currentData, currentMonth, true)}
         {renderCard("Previous Month", "Historical comparison", prevData, prevMonth, false)}
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Trend chart */}
+        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 glass-card">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground">Notifications Trend</h3>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">Received vs. closed — last 7 months</p>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-primary" /> Received
+              </span>
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-success" /> Closed
+              </span>
+            </div>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorReceived" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorClosed" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--success))" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="hsl(var(--success))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
+                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                    fontSize: "12px",
+                  }}
+                />
+                <Area type="monotone" dataKey="received" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#colorReceived)" />
+                <Area type="monotone" dataKey="closed" stroke="hsl(var(--success))" strokeWidth={2} fill="url(#colorClosed)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Regulator distribution */}
+        <div className="bg-card border border-border rounded-2xl p-6 glass-card">
+          <div className="flex items-center gap-2 mb-1">
+            <Activity className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-semibold text-foreground">By Regulator</h3>
+          </div>
+          <p className="text-xs text-muted-foreground mb-2">March distribution</p>
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={regulatorData}
+                  innerRadius={45}
+                  outerRadius={75}
+                  paddingAngle={3}
+                  dataKey="value"
+                  stroke="hsl(var(--card))"
+                  strokeWidth={2}
+                >
+                  {regulatorData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--popover))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                    fontSize: "12px",
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            {regulatorData.map((r) => (
+              <div key={r.name} className="flex items-center gap-2 text-xs">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: r.color }} />
+                <span className="text-muted-foreground">{r.name}</span>
+                <span className="ml-auto font-semibold text-foreground tabular-nums">{r.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Department bar chart */}
+      <div className="bg-card border border-border rounded-2xl p-6 glass-card">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold text-foreground">Impacted Departments</h3>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">Notifications by impacted department</p>
+          </div>
+        </div>
+        <div className="h-56">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={departmentData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorBar" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={1} />
+                  <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0.7} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} vertical={false} />
+              <XAxis dataKey="dept" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+              <Tooltip
+                cursor={{ fill: "hsl(var(--secondary))", opacity: 0.4 }}
+                contentStyle={{
+                  backgroundColor: "hsl(var(--popover))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "0.5rem",
+                  fontSize: "12px",
+                }}
+              />
+              <Bar dataKey="count" fill="url(#colorBar)" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Notification Table */}
